@@ -81,25 +81,22 @@ if if_table_not_exists(conn, "MECHANICS"):
 
 log_progress('Connecting to Database complete')
 
-"""
-query_statment = 'SELECT * FROM BOARDGAME'
-output = pd.read_sql(query_statment,conn)
-print (output)
-"""
-id_list = collection_df['Id'].to_list()
-
-
+extracted_id_list = collection_df['Id'].to_list()
+query_statment = ("SELECT Id FROM BOARDGAME")
+sql_boardgame_df = pd.read_sql(query_statment,conn)
+sql_id_list = sql_boardgame_df['Id'].to_list()
+new_game_list = list(set(extracted_id_list) - set(sql_id_list))
 
 i = 1
-for game_id in id_list:
-    print(f"extracting game mechanics from {collection_df.loc[collection_df['Id'] == game_id, "Name"].iloc[0]} ({i}/{len(id_list)})")
+for game_id in new_game_list:
+    print(f"extracting game mechanics from {collection_df.loc[collection_df['Id'] == game_id, "Name"].iloc[0]} ({i}/{len(new_game_list)})")
     mechanics_count_df = extract_game_mechanics(game_id,mechanics_count_df)
     i = i+1
 
 log_progress('Game Mechanics extraction complete')
 
-mechanics_count_df.to_sql("MECHANICS", conn, if_exists='replace',index=False)
-collection_df.to_sql("BOARDGAME",conn,if_exists='replace',index=False)
+mechanics_count_df.to_sql("MECHANICS", conn, if_exists='append',index=False)
+collection_df.to_sql("BOARDGAME",conn,if_exists='append',index=False)
 
 log_progress('Load Data to Database complete')
 
