@@ -92,15 +92,18 @@ designer_count_df = pd.DataFrame(columns = ['Game Designer', 'Count'])
 
 
 if if_table_not_exists(conn, "BOARDGAMES"):
-    pd.DataFrame(columns=['Id','Name', 'Rating']).to_sql("BOARDGAMES",conn,if_exists='fail',index=False, dtype= { 'Id':'INTEGER','Name': 'TEXT','Rating': 'REAL'})
+    pd.DataFrame(columns=['Id','Name', 'Rating']).to_sql(
+        "BOARDGAMES",conn,if_exists='fail',index=False, dtype= { 'Id':'INTEGER','Name': 'TEXT','Rating': 'REAL'})
 
 if if_table_not_exists(conn, "MECHANICS"):
-    mechanics_count_df.to_sql("MECHANICS",conn,if_exists='fail',index=False, dtype= { 'Game Mechanic': 'TEXT','Count': 'INTEGER'})
+    mechanics_count_df.to_sql(
+        "MECHANICS",conn,if_exists='fail',index=False, dtype= { 'Game Mechanic': 'TEXT','Count': 'INTEGER'})
 else:
     mechanics_count_df = pd.read_sql("SELECT * FROM MECHANICS", conn)
 
 if if_table_not_exists(conn, "DESIGNERS"):
-    designer_count_df.to_sql("DESIGNERS",conn,if_exists='fail',index=False, dtype= { 'Game Designer': 'TEXT','Count': 'INTEGER'})
+    designer_count_df.to_sql(
+        "DESIGNERS",conn,if_exists='fail',index=False, dtype= { 'Game Designer': 'TEXT','Count': 'INTEGER'})
 else:
     designer_count_df = pd.read_sql("SELECT * FROM DESIGNERS", conn)
 
@@ -111,12 +114,12 @@ query_statment = ("SELECT Id FROM BOARDGAMES")
 sql_boardgame_df = pd.read_sql(query_statment,conn)
 
 sql_id_list = sql_boardgame_df['Id'].to_list()
-print(sql_id_list)
+
 new_game_list = list(set(extracted_id_list) - set(sql_id_list))
 
 i = 1
 for game_id in new_game_list:
-    print(f"extracting game mechanics from {collection_df.loc[collection_df['Id'] == game_id, "Name"].iloc[0]} ({i}/{len(new_game_list)})")
+    #print(f"extracting game mechanics from {collection_df.loc[collection_df['Id'] == game_id, "Name"].iloc[0]} ({i}/{len(new_game_list)})")
     mechanics_count_df, designer_count_df = extract_game_mechanics(game_id,mechanics_count_df, designer_count_df)
     i = i+1
 
@@ -127,6 +130,11 @@ collection_df['Id'] = collection_df['Id'].astype(int)
 mechanics_count_df.to_sql("MECHANICS", conn, if_exists='replace',index=False)
 designer_count_df.to_sql("DESIGNERS", conn, if_exists='replace',index=False)
 collection_df.to_sql("BOARDGAMES",conn,if_exists='replace',index=False)
+
+with pd.ExcelWriter(f'{username}.xlsx') as writer:
+    collection_df.to_excel(writer,sheet_name='Collection')
+    mechanics_count_df.to_excel(writer, sheet_name='Game_Mechanics')
+    designer_count_df.to_excel(writer, sheet_name='Game_Designers') 
 
 log_progress('Load Data to Database complete')
 
