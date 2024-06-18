@@ -11,6 +11,7 @@ This Python script extracts collection data from the BoardGameGeek (BGG) XML API
 - Extracts game collection data from the BGG XML API.
 - Stores data in a SQLite database.
 - Displays top mechanics, board games, and designers based on the data.
+- Outputs data to an Excel file with multiple sheets.
 
 ## Requirements
 
@@ -19,6 +20,7 @@ This Python script extracts collection data from the BoardGameGeek (BGG) XML API
   - `pandas`
   - `requests`
   - `sqlite3`
+  - `openpyxl`
 
 ## Setup Instructions
 
@@ -34,13 +36,7 @@ This Python script extracts collection data from the BoardGameGeek (BGG) XML API
     Ensure you have `pip` installed. If not, install it first. Then, run:
 
     ```bash
-    pip install pandas requests
-    ```
-
-3. **Run the Script**
-
-    ```bash
-    python bgg_data_extractor.py
+    pip install pandas requests openpyxl
     ```
 
 ## How to Use
@@ -59,13 +55,14 @@ This Python script extracts collection data from the BoardGameGeek (BGG) XML API
 
 3. **View Results**
 
-    The script will extract your game collection data, store it in a SQLite database named after your username, and display tables of the top mechanics, games, and designers.
+    The script will extract your game collection data, store it in a SQLite database and Excel file, both named after your username.
 
 ## Project Structure
 
 - `extract_from_api.py`: Main script to extract and display BGG data.
 - `bgg_log.txt`: Log file to track the progress of operations.
 - `{username}.db`: SQLite database generated for each BGG username entered.
+- `{username}.xlsx`: Excel file generated for each BGG username entered.
 
 ## Contributing
 
