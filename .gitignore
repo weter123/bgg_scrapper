@@ -1,2 +1,5 @@
 bgg_log.txt
 noobcitizen.db
+/build/
+/dist/
+*.spec
