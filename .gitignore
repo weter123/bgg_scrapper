@@ -1,6 +1,6 @@
 bgg_log.txt
-noobcitizen.db
+*.db
 /build/
 /dist/
 *.spec
-noobcitizen.xlsx
+*.xlsx
