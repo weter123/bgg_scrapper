@@ -119,7 +119,7 @@ new_game_list = list(set(extracted_id_list) - set(sql_id_list))
 
 i = 1
 for game_id in new_game_list:
-    #print(f"extracting game mechanics from {collection_df.loc[collection_df['Id'] == game_id, "Name"].iloc[0]} ({i}/{len(new_game_list)})")
+    print(f"extracting game mechanics from {collection_df.loc[collection_df['Id'] == game_id, 'Name'].iloc[0]} ({i}/{len(new_game_list)})")
     mechanics_count_df, designer_count_df = extract_game_mechanics(game_id,mechanics_count_df, designer_count_df)
     i = i+1
 
