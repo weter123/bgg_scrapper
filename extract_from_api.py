@@ -21,6 +21,12 @@ def extract_from_xml(name):
     page = requests.get(f'https://boardgamegeek.com/xmlapi/collection/{name}')
     root = ET.fromstring(page.text)
     if root.tag == 'errors':
+        print("collection for the provided username not found."
+              + "check spelling or try a different username"
+        )
+        return temp_df, False
+    if page.status_code != 200:
+        print("Unexpected issue came up. please try again")
         return temp_df, False
     for child in root:
         rating = 0.0
@@ -78,11 +84,7 @@ while VALID is False:
     username = input("Enter username:")
     print("Username is: " + username)
     log_progress('Username entered. Starting collection extraction')
-    collection_df, VALID = extract_from_xml(username)
-    if VALID is False:
-        print("collection for the provided username not found."
-              + "check spelling or try a different username"
-        )
+    collection_df, VALID = extract_from_xml(username)  
 
 log_progress('Collection extraction complete')
 
