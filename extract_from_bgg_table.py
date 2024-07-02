@@ -31,40 +31,40 @@ def get_number_of_pages(url):
             if page["title"] != "next page":
                 page_before_next = page.text
             else:
-                return page_before_next
+                return int(page_before_next)
             
-    return last_page[0].text[1:-1]
+    return int(last_page[0].text[1:-1])
 
-url = 'https://boardgamegeek.com/geeksearch.php?action=search&advsearch=1&objecttype=boardgame&q=&include%5Bdesignerid%5D=&geekitemname=&geekitemname=&include%5Bpublisherid%5D=&range%5Byearpublished%5D%5Bmin%5D=&range%5Byearpublished%5D%5Bmax%5D=&range%5Bminage%5D%5Bmax%5D=&floatrange%5Bavgrating%5D%5Bmin%5D=&floatrange%5Bavgrating%5D%5Bmax%5D=&range%5Bnumvoters%5D%5Bmin%5D=&floatrange%5Bavgweight%5D%5Bmin%5D=&floatrange%5Bavgweight%5D%5Bmax%5D=&range%5Bnumweights%5D%5Bmin%5D=&colfiltertype=&searchuser=noobcitizen&range%5Bminplayers%5D%5Bmax%5D=&range%5Bmaxplayers%5D%5Bmin%5D=&playerrangetype=normal&range%5Bleastplaytime%5D%5Bmin%5D=&range%5Bplaytime%5D%5Bmax%5D=&propertyids%5B%5D=1009&B1=Submit'
+url = 'https://boardgamegeek.com/geeksearch.php?action=search&advsearch=1&objecttype=boardgame&q=&include%5Bdesignerid%5D=&geekitemname=&geekitemname=&include%5Bpublisherid%5D=&range%5Byearpublished%5D%5Bmin%5D=&range%5Byearpublished%5D%5Bmax%5D=&range%5Bminage%5D%5Bmax%5D=&floatrange%5Bavgrating%5D%5Bmin%5D=&floatrange%5Bavgrating%5D%5Bmax%5D=&range%5Bnumvoters%5D%5Bmin%5D=&floatrange%5Bavgweight%5D%5Bmin%5D=&floatrange%5Bavgweight%5D%5Bmax%5D=&range%5Bnumweights%5D%5Bmin%5D=&colfiltertype=owned&searchuser=noobcitizen&range%5Bminplayers%5D%5Bmax%5D=&range%5Bmaxplayers%5D%5Bmin%5D=&playerrangetype=normal&range%5Bleastplaytime%5D%5Bmin%5D=&range%5Bplaytime%5D%5Bmax%5D=&B1=Submit'
 
 page_num = get_number_of_pages(url)
 
-'''
 search_result_df = pd.DataFrame(columns=['Ranking','Name', 'Geek Rating', 'Average Rating','Number of Votes'])
-page_num = 1
+
 log_progress("Requesting Data from website")
-page = requests.get(f'https://boardgamegeek.com/search/boardgame/page/{page_num}?advsearch=1&q=&include%5Bdesignerid%5D=&include%5Bpublisherid%5D=&geekitemname=&range%5Byearpublished%5D%5Bmin%5D=&range%5Byearpublished%5D%5Bmax%5D=&range%5Bminage%5D%5Bmax%5D=&range%5Bnumvoters%5D%5Bmin%5D=&range%5Bnumweights%5D%5Bmin%5D=&range%5Bminplayers%5D%5Bmax%5D=&range%5Bmaxplayers%5D%5Bmin%5D=&range%5Bleastplaytime%5D%5Bmin%5D=&range%5Bplaytime%5D%5Bmax%5D=&floatrange%5Bavgrating%5D%5Bmin%5D=&floatrange%5Bavgrating%5D%5Bmax%5D=&floatrange%5Bavgweight%5D%5Bmin%5D=&floatrange%5Bavgweight%5D%5Bmax%5D=&colfiltertype=rated&searchuser=noobcitizen&playerrangetype=normal&B1=Submit').text
+for page in range(1,page_num +1):
+    current_page = requests.get(f'https://boardgamegeek.com/search/boardgame/page/{page}?advsearch=1&q=&include%5Bdesignerid%5D=&include%5Bpublisherid%5D=&geekitemname=&range%5Byearpublished%5D%5Bmin%5D=&range%5Byearpublished%5D%5Bmax%5D=&range%5Bminage%5D%5Bmax%5D=&range%5Bnumvoters%5D%5Bmin%5D=&range%5Bnumweights%5D%5Bmin%5D=&range%5Bminplayers%5D%5Bmax%5D=&range%5Bmaxplayers%5D%5Bmin%5D=&range%5Bleastplaytime%5D%5Bmin%5D=&range%5Bplaytime%5D%5Bmax%5D=&floatrange%5Bavgrating%5D%5Bmin%5D=&floatrange%5Bavgrating%5D%5Bmax%5D=&floatrange%5Bavgweight%5D%5Bmin%5D=&floatrange%5Bavgweight%5D%5Bmax%5D=&colfiltertype=owned&searchuser=noobcitizen&playerrangetype=normal&B1=Submit').text
 
-soup = BeautifulSoup(page,'html.parser')
-tables = soup.find_all('table')
-rows = tables[0].find_all('tr')
+    soup = BeautifulSoup(current_page,'html.parser')
+    tables = soup.find_all('table')
+    rows = tables[0].find_all('tr')
 
-for row in rows:
-    columns = row.find_all('td')
-    if len(columns) > 3:
-      
+    for row in rows:
+        columns = row.find_all('td')
+        if len(columns) > 3:
+        
 
-        game_dict = {
-            'Ranking' :columns[0].text.strip(),
-            'Name' : columns[2].a.text, 
-            'Geek Rating': columns[3].text.strip(), 
-            'Average Rating': columns[4].text.strip(),
-            'Number of Votes':columns[5].text.strip()
-        }
-        single_entry_df = pd.DataFrame(game_dict, index=[0])
-        search_result_df = pd.concat([search_result_df,single_entry_df],ignore_index=True)
+            game_dict = {
+                'Ranking' :columns[0].text.strip(),
+                'Name' : columns[2].a.text, 
+                'Geek Rating': columns[3].text.strip(), 
+                'Average Rating': columns[4].text.strip(),
+                'Number of Votes':columns[5].text.strip()
+            }
+            single_entry_df = pd.DataFrame(game_dict, index=[0])
+            search_result_df = pd.concat([search_result_df,single_entry_df],ignore_index=True)
 
-print(search_result_df)
+
 
 timestamp_format = '%Y-%h-%d-%H%M%S'
 now = datetime.now()
@@ -72,4 +72,3 @@ timestamp = now.strftime(timestamp_format)
 with pd.ExcelWriter(f'search_result_{timestamp}.xlsx') as writer:
     search_result_df.to_excel(writer,sheet_name='Search_Result')
 
-'''
