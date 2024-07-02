@@ -14,7 +14,32 @@ def log_progress(message):
     with open("./bgg_log.txt","a") as line:
         line.write(timestamp + ' : ' + message + '\n')
 
+def get_number_of_pages(url):
+    main_page = requests.get(url).text
+    soup = BeautifulSoup(main_page,'html.parser')
+    page_numbers_bar = soup.find_all('div',{"class": "fr"})
+    
+    last_page = page_numbers_bar[0].find_all('a',{"title": "last page"})
 
+    if not last_page:
+        pages = page_numbers_bar[0].find_all('a') 
+        if not pages:
+            return 1
+        
+        page_before_next = 1
+        for page in pages:
+            if page["title"] != "next page":
+                page_before_next = page.text
+            else:
+                return page_before_next
+            
+    return last_page[0].text[1:-1]
+
+url = 'https://boardgamegeek.com/geeksearch.php?action=search&advsearch=1&objecttype=boardgame&q=&include%5Bdesignerid%5D=&geekitemname=&geekitemname=&include%5Bpublisherid%5D=&range%5Byearpublished%5D%5Bmin%5D=&range%5Byearpublished%5D%5Bmax%5D=&range%5Bminage%5D%5Bmax%5D=&floatrange%5Bavgrating%5D%5Bmin%5D=&floatrange%5Bavgrating%5D%5Bmax%5D=&range%5Bnumvoters%5D%5Bmin%5D=&floatrange%5Bavgweight%5D%5Bmin%5D=&floatrange%5Bavgweight%5D%5Bmax%5D=&range%5Bnumweights%5D%5Bmin%5D=&colfiltertype=&searchuser=noobcitizen&range%5Bminplayers%5D%5Bmax%5D=&range%5Bmaxplayers%5D%5Bmin%5D=&playerrangetype=normal&range%5Bleastplaytime%5D%5Bmin%5D=&range%5Bplaytime%5D%5Bmax%5D=&propertyids%5B%5D=1009&B1=Submit'
+
+page_num = get_number_of_pages(url)
+
+'''
 search_result_df = pd.DataFrame(columns=['Ranking','Name', 'Geek Rating', 'Average Rating','Number of Votes'])
 page_num = 1
 log_progress("Requesting Data from website")
@@ -47,3 +72,4 @@ timestamp = now.strftime(timestamp_format)
 with pd.ExcelWriter(f'search_result_{timestamp}.xlsx') as writer:
     search_result_df.to_excel(writer,sheet_name='Search_Result')
 
+'''
