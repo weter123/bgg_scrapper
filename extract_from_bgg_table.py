@@ -15,36 +15,56 @@ def log_progress(message):
         line.write(timestamp + ' : ' + message + '\n')
 
 def get_number_of_pages(url):
-    main_page = requests.get(url).text
-    soup = BeautifulSoup(main_page,'html.parser')
-    page_numbers_bar = soup.find_all('div',{"class": "fr"})
-    
-    last_page = page_numbers_bar[0].find_all('a',{"title": "last page"})
+    try:
+        if url.find('https://boardgamegeek.com/geeksearch.php?action=search&advsearch') == -1:
+            print("the url is not for bbg advance search result web page. Please provide a valid web page")
+            return 1, False
 
-    if not last_page:
-        pages = page_numbers_bar[0].find_all('a') 
-        if not pages:
-            return 1
+        page_request = requests.get(url)
+        main_page = page_request.text
+        soup = BeautifulSoup(main_page,'html.parser')
+        page_numbers_bar = soup.find_all('div',{"class": "fr"})
         
-        page_before_next = 1
-        for page in pages:
-            if page["title"] != "next page":
-                page_before_next = page.text
-            else:
-                return int(page_before_next)
+        last_page = page_numbers_bar[0].find_all('a',{"title": "last page"})
+
+        if not last_page:
+            pages = page_numbers_bar[0].find_all('a') 
+            if not pages:
+                return 1, True
             
-    return int(last_page[0].text[1:-1])
+            page_before_next = 1
+            for page in pages:
+                if page["title"] != "next page":
+                    page_before_next = page.text
+                else:
+                    return int(page_before_next), True
+                
+        return int(last_page[0].text[1:-1]), True
+    except Exception:
+        print("error occured. check the url, then try again")
+        return 1,False
 
 url = 'https://boardgamegeek.com/geeksearch.php?action=search&advsearch=1&objecttype=boardgame&q=&include%5Bdesignerid%5D=&geekitemname=&geekitemname=&include%5Bpublisherid%5D=&range%5Byearpublished%5D%5Bmin%5D=&range%5Byearpublished%5D%5Bmax%5D=&range%5Bminage%5D%5Bmax%5D=&floatrange%5Bavgrating%5D%5Bmin%5D=&floatrange%5Bavgrating%5D%5Bmax%5D=&range%5Bnumvoters%5D%5Bmin%5D=&floatrange%5Bavgweight%5D%5Bmin%5D=&floatrange%5Bavgweight%5D%5Bmax%5D=&range%5Bnumweights%5D%5Bmin%5D=&colfiltertype=owned&searchuser=noobcitizen&range%5Bminplayers%5D%5Bmax%5D=&range%5Bmaxplayers%5D%5Bmin%5D=&playerrangetype=normal&range%5Bleastplaytime%5D%5Bmin%5D=&range%5Bplaytime%5D%5Bmax%5D=&B1=Submit'
 
-page_num = get_number_of_pages(url)
+VALID = False
+page_num =1
+while VALID is False:
+    url = input("enter url:")
+    print("url is: " + url)
+    log_progress('url entered. Starting get total number of web pages')
+    page_num, VALID = get_number_of_pages(url)  
+
+log_progress('number of pages acquired')
+
 
 search_result_df = pd.DataFrame(columns=['Ranking','Name', 'Geek Rating', 'Average Rating','Number of Votes'])
 
-log_progress("Requesting Data from website")
+parameter_index = url.index("advsearch")
+url_parameters = url[parameter_index:]
+print(url_parameters)
 for page in range(1,page_num +1):
-    current_page = requests.get(f'https://boardgamegeek.com/search/boardgame/page/{page}?advsearch=1&q=&include%5Bdesignerid%5D=&include%5Bpublisherid%5D=&geekitemname=&range%5Byearpublished%5D%5Bmin%5D=&range%5Byearpublished%5D%5Bmax%5D=&range%5Bminage%5D%5Bmax%5D=&range%5Bnumvoters%5D%5Bmin%5D=&range%5Bnumweights%5D%5Bmin%5D=&range%5Bminplayers%5D%5Bmax%5D=&range%5Bmaxplayers%5D%5Bmin%5D=&range%5Bleastplaytime%5D%5Bmin%5D=&range%5Bplaytime%5D%5Bmax%5D=&floatrange%5Bavgrating%5D%5Bmin%5D=&floatrange%5Bavgrating%5D%5Bmax%5D=&floatrange%5Bavgweight%5D%5Bmin%5D=&floatrange%5Bavgweight%5D%5Bmax%5D=&colfiltertype=owned&searchuser=noobcitizen&playerrangetype=normal&B1=Submit').text
-
+    print(page)
+    current_page = requests.get(f'https://boardgamegeek.com/search/boardgame/page/{page}?'+ url_parameters).text
     soup = BeautifulSoup(current_page,'html.parser')
     tables = soup.find_all('table')
     rows = tables[0].find_all('tr')
