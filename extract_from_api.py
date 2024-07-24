@@ -51,6 +51,7 @@ def extract_game_mechanics(this_game_id,mechanics_df, designer_df):
     for child in root:
         for sub in child:
             if sub.tag == 'boardgamemechanic':
+                '''
                 if mechanics_df[mechanics_df['Game Mechanic'].str.contains(sub.text)].empty:
                     game_dict = {'Game Mechanic': sub.text, 'Count': 1}
                     mechanics_count_df = pd.DataFrame(game_dict, index = [0])
@@ -59,7 +60,12 @@ def extract_game_mechanics(this_game_id,mechanics_df, designer_df):
                     mechanics_df.loc[mechanics_df['Game Mechanic'] == sub.text ,'Count'] = (
                         mechanics_df.loc[mechanics_df['Game Mechanic'] == sub.text ,'Count'] +1
                     )
+                '''
+                game_dict = {'Game Id': int(this_game_id) ,'Game Mechanic': sub.text}
+                new_mechanics_df = pd.DataFrame(game_dict, index = [0])
+                mechanics_df = pd.concat([mechanics_df, new_mechanics_df], ignore_index=True)
             elif sub.tag == 'boardgamedesigner':
+                '''
                 if designer_df[designer_df['Game Designer'].str.contains(sub.text)].empty:
                     game_dict = {'Game Designer': sub.text, 'Count': 1}
                     designer_count_df = pd.DataFrame(game_dict, index = [0])
@@ -68,6 +74,10 @@ def extract_game_mechanics(this_game_id,mechanics_df, designer_df):
                    designer_df.loc[designer_df['Game Designer'] == sub.text ,'Count'] = (
                         designer_df.loc[designer_df['Game Designer'] == sub.text ,'Count'] +1
                     )
+                '''
+                game_dict = {'Game Id': int(this_game_id) ,'Game Designer': sub.text}
+                new_designer_df = pd.DataFrame(game_dict, index = [0])
+                designer_df= pd.concat([designer_df,new_designer_df], ignore_index=True)
     return mechanics_df, designer_df
 
 def if_table_not_exists(conn, table_name):
@@ -89,8 +99,8 @@ while VALID is False:
 log_progress('Collection extraction complete')
 
 conn = sqlite3.connect(f'{username}.db')
-mechanics_count_df = pd.DataFrame(columns = ['Game Mechanic', 'Count'])
-designer_count_df = pd.DataFrame(columns = ['Game Designer', 'Count'])
+mechanics_df = pd.DataFrame(columns = ['Game Id','Game Mechanic'])
+designer_df = pd.DataFrame(columns = ['Game Id','Game Designer'])
 
 
 if if_table_not_exists(conn, "BOARDGAMES"):
@@ -98,16 +108,16 @@ if if_table_not_exists(conn, "BOARDGAMES"):
         "BOARDGAMES",conn,if_exists='fail',index=False, dtype= { 'Id':'INTEGER','Name': 'TEXT','Rating': 'REAL'})
 
 if if_table_not_exists(conn, "MECHANICS"):
-    mechanics_count_df.to_sql(
-        "MECHANICS",conn,if_exists='fail',index=False, dtype= { 'Game Mechanic': 'TEXT','Count': 'INTEGER'})
+    mechanics_df.to_sql(
+        "MECHANICS",conn,if_exists='fail',index=False, dtype= { 'Game Id':'INTEGER', 'Game Mechanic': 'TEXT'})
 else:
-    mechanics_count_df = pd.read_sql("SELECT * FROM MECHANICS", conn)
+    mechanics_df = pd.read_sql("SELECT * FROM MECHANICS", conn)
 
 if if_table_not_exists(conn, "DESIGNERS"):
-    designer_count_df.to_sql(
-        "DESIGNERS",conn,if_exists='fail',index=False, dtype= { 'Game Designer': 'TEXT','Count': 'INTEGER'})
+    designer_df.to_sql(
+        "DESIGNERS",conn,if_exists='fail',index=False, dtype= { 'Game Id':'INTEGER', 'Game Designer': 'TEXT'})
 else:
-    designer_count_df = pd.read_sql("SELECT * FROM DESIGNERS", conn)
+    designer_df = pd.read_sql("SELECT * FROM DESIGNERS", conn)
 
 log_progress('Connecting to Database complete')
 
@@ -122,23 +132,24 @@ new_game_list = list(set(extracted_id_list) - set(sql_id_list))
 i = 1
 for game_id in new_game_list:
     print(f"extracting game mechanics from {collection_df.loc[collection_df['Id'] == game_id, 'Name'].iloc[0]} ({i}/{len(new_game_list)})")
-    mechanics_count_df, designer_count_df = extract_game_mechanics(game_id,mechanics_count_df, designer_count_df)
+    mechanics_df, designer_df = extract_game_mechanics(game_id,mechanics_df, designer_df)
     i = i+1
 
 log_progress('Game Mechanics extraction complete')
 
 collection_df['Id'] = collection_df['Id'].astype(int)
 
-mechanics_count_df.to_sql("MECHANICS", conn, if_exists='replace',index=False)
-designer_count_df.to_sql("DESIGNERS", conn, if_exists='replace',index=False)
+mechanics_df.to_sql("MECHANICS", conn, if_exists='replace',index=False)
+designer_df.to_sql("DESIGNERS", conn, if_exists='replace',index=False)
 collection_df.to_sql("BOARDGAMES",conn,if_exists='replace',index=False)
 
 with pd.ExcelWriter(f'{username}.xlsx') as writer:
     collection_df.to_excel(writer,sheet_name='Collection')
-    mechanics_count_df.to_excel(writer, sheet_name='Game_Mechanics')
-    designer_count_df.to_excel(writer, sheet_name='Game_Designers') 
+    mechanics_df.to_excel(writer, sheet_name='Game_Mechanics')
+    designer_df.to_excel(writer, sheet_name='Game_Designers') 
 
 log_progress('Load Data to Database complete')
+
 
 query_statment = ("SELECT * FROM MECHANICS "
                   + "ORDER BY COUNT DESC "
