@@ -151,8 +151,10 @@ with pd.ExcelWriter(f'{username}.xlsx') as writer:
 log_progress('Load Data to Database complete')
 
 
-query_statment = ("SELECT * FROM MECHANICS "
-                  + "ORDER BY COUNT DESC "
+query_statment = ("SELECT `Game Mechanic`, count(*) as 'Count' "
+                  + "from MECHANICS "
+                  + "group by `Game Mechanic` "
+                  + "order by Count desc "
                   + "LIMIT 10")
 top_mechanics_df = pd.read_sql(query_statment,conn)
 print(top_mechanics_df.to_string())
@@ -163,8 +165,10 @@ query_statment = ("SELECT * FROM Boardgames "
 top_mechanics_df = pd.read_sql(query_statment,conn)
 print(top_mechanics_df.to_string())
 
-query_statment = ("SELECT * FROM DESIGNERS "
-                  + "ORDER BY COUNT DESC "
+query_statment = ("SELECT `Game Designer`, count(*) as 'Count' "
+                  + "from DESIGNERS "
+                  + "group by `Game Designer` "
+                  + "order by Count desc "
                   + "LIMIT 10")
 top_mechanics_df = pd.read_sql(query_statment,conn)
 print(top_mechanics_df.to_string())
