@@ -44,37 +44,17 @@ def extract_from_xml(name):
         temp_df = pd.concat([temp_df,single_mechanic_df],ignore_index=True)
     return temp_df, True
 
-def extract_game_mechanics(this_game_id,mechanics_df, designer_df):
-    """extract game mechanics for a specific boardgame from BBG XML API"""
-    page = requests.get(f'https://api.geekdo.com/xmlapi/boardgame/{this_game_id}').text
+def extract_game_data(this_game_id,mechanics_df, designer_df):
+    """extract game mechanics and designers for a specific boardgame from BBG XML API"""
+    page = requests.get(f'https://api.geekdo.com/xmlapi/boardgame/{this_game_id}',timeout=10).text
     root = ET.fromstring(page)
     for child in root:
         for sub in child:
             if sub.tag == 'boardgamemechanic':
-                '''
-                if mechanics_df[mechanics_df['Game Mechanic'].str.contains(sub.text)].empty:
-                    game_dict = {'Game Mechanic': sub.text, 'Count': 1}
-                    mechanics_count_df = pd.DataFrame(game_dict, index = [0])
-                    mechanics_df = pd.concat([mechanics_df,mechanics_count_df], ignore_index=True)
-                else:
-                    mechanics_df.loc[mechanics_df['Game Mechanic'] == sub.text ,'Count'] = (
-                        mechanics_df.loc[mechanics_df['Game Mechanic'] == sub.text ,'Count'] +1
-                    )
-                '''
                 game_dict = {'Game Id': int(this_game_id) ,'Game Mechanic': sub.text}
                 new_mechanics_df = pd.DataFrame(game_dict, index = [0])
                 mechanics_df = pd.concat([mechanics_df, new_mechanics_df], ignore_index=True)
             elif sub.tag == 'boardgamedesigner':
-                '''
-                if designer_df[designer_df['Game Designer'].str.contains(sub.text)].empty:
-                    game_dict = {'Game Designer': sub.text, 'Count': 1}
-                    designer_count_df = pd.DataFrame(game_dict, index = [0])
-                    designer_df= pd.concat([designer_df,designer_count_df], ignore_index=True)
-                else:
-                   designer_df.loc[designer_df['Game Designer'] == sub.text ,'Count'] = (
-                        designer_df.loc[designer_df['Game Designer'] == sub.text ,'Count'] +1
-                    )
-                '''
                 game_dict = {'Game Id': int(this_game_id) ,'Game Designer': sub.text}
                 new_designer_df = pd.DataFrame(game_dict, index = [0])
                 designer_df= pd.concat([designer_df,new_designer_df], ignore_index=True)
@@ -132,7 +112,7 @@ new_game_list = list(set(extracted_id_list) - set(sql_id_list))
 i = 1
 for game_id in new_game_list:
     print(f"extracting game mechanics from {collection_df.loc[collection_df['Id'] == game_id, 'Name'].iloc[0]} ({i}/{len(new_game_list)})")
-    mechanics_df, designer_df = extract_game_mechanics(game_id,mechanics_df, designer_df)
+    mechanics_df, designer_df = extract_game_data(game_id,mechanics_df, designer_df)
     i = i+1
 
 log_progress('Game Mechanics extraction complete')
