@@ -16,7 +16,7 @@ def log_progress(message):
         line.write(timestamp + ' : ' + message + '\n')
 
 def extract_from_xml(name):
-    """extract collection data from BGG XML API"""
+    """extract boardgamegeek user's collection data from BGG XML API"""
     temp_df = pd.DataFrame(columns=['Id','Name', 'Rating'])
     page = requests.get(f'https://boardgamegeek.com/xmlapi/collection/{name}')
     root = ET.fromstring(page.text)
@@ -70,6 +70,7 @@ def if_table_not_exists(conn, table_name):
 collection_df = pd.DataFrame()
 VALID = False
 
+""" prompt user for username input and run extract_from_xml function"""
 while VALID is False:
     username = input("Enter username:")
     print("Username is: " + username)
@@ -78,6 +79,7 @@ while VALID is False:
 
 log_progress('Collection extraction complete')
 
+""" connect to database and create Tables and DataFrames for Boardgames, Mechanics and Designers data"""
 conn = sqlite3.connect(f'{username}.db')
 mechanics_df = pd.DataFrame(columns = ['Game Id','Game Mechanic'])
 designer_df = pd.DataFrame(columns = ['Game Id','Game Designer'])
@@ -101,6 +103,7 @@ else:
 
 log_progress('Connecting to Database complete')
 
+"""extract list of game IDs of newly added game IDs"""
 extracted_id_list = collection_df['Id'].to_list()
 query_statment = ("SELECT Id FROM BOARDGAMES")
 sql_boardgame_df = pd.read_sql(query_statment,conn)
@@ -109,6 +112,8 @@ sql_id_list = sql_boardgame_df['Id'].to_list()
 
 new_game_list = list(set(extracted_id_list) - set(sql_id_list))
 
+
+""" extract data of newly added games """
 i = 1
 for game_id in new_game_list:
     print(f"extracting game mechanics from {collection_df.loc[collection_df['Id'] == game_id, 'Name'].iloc[0]} ({i}/{len(new_game_list)})")
@@ -117,12 +122,14 @@ for game_id in new_game_list:
 
 log_progress('Game Mechanics extraction complete')
 
+""" populate database with game data """
 collection_df['Id'] = collection_df['Id'].astype(int)
 
 mechanics_df.to_sql("MECHANICS", conn, if_exists='replace',index=False)
 designer_df.to_sql("DESIGNERS", conn, if_exists='replace',index=False)
 collection_df.to_sql("BOARDGAMES",conn,if_exists='replace',index=False)
 
+""" create and populate excel file with game data """
 with pd.ExcelWriter(f'{username}.xlsx') as writer:
     collection_df.to_excel(writer,sheet_name='Collection')
     mechanics_df.to_excel(writer, sheet_name='Game_Mechanics')
