@@ -83,6 +83,5 @@ BGG Scrapper is a Python-based package designed to scrape data from the BoardGam
 
 Contributions are welcome! Please open an issue or submit a pull request for any improvements or bug fixes.
 
-## Contact
 
 
