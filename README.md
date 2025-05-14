@@ -1,61 +1,76 @@
 # BGG Scrapper
-the goal is to create a package of python scripts that will be used to web scrap BoardGameGeek website using BGG XML API2 and web scrapping technology and load the extracted data into a database
 
-![image](https://github.com/weter123/bgg_scrapper/assets/17746651/83cde9f3-38ec-48ab-a8e5-fefd7952a9c4)
-# Extract Collection Data BoardGameGeek XML API 2 (extract_from_api.py)
+BGG Scrapper is a Python-based package designed to scrape data from the BoardGameGeek (BGG) website using the BGG XML API2 and web scraping technologies. The extracted data is processed, stored in a SQLite database, and Excel files.
 
-This Python script extracts collection data from the BoardGameGeek (BGG) XML API, stores the data in a SQLite database, and displays tables of the top game mechanics, board games, and designers.
+![BGG Scrapper](https://github.com/weter123/bgg_scrapper/assets/17746651/83cde9f3-38ec-48ab-a8e5-fefd7952a9c4)
 
-## Features
+---
 
-- Extracts game collection data from the BGG XML API.
-- Stores data in a SQLite database.
-- Displays top mechanics, board games, and designers based on the data.
-- Outputs data to an Excel file with multiple sheets.
+## ✨ Features
 
-## Requirements
+- **Data Extraction**: Fetch board game collection data using the BGG XML API.
+- **Database Storage**: Store board games, mechanics, and designers in a structured SQLite database.
+- **Excel Export**: Generate Excel files with multiple sheets for collections, mechanics, and designers.
+- **Web Scraping**: Scrape advanced search results directly from the BGG website using `BeautifulSoup`.
+- **Reports**: Display top game mechanics, board games, and designers based on the extracted data.
 
-- Python 3.x
-- Required Python packages:
+---
+
+## 📋 Requirements
+
+- **Python Version**: Python 3.x
+- **Dependencies**:
   - `pandas`
   - `requests`
   - `sqlite3`
   - `openpyxl`
+  - `BeautifulSoup` (for advanced web scraping)
 
-## Setup Instructions
+---
 
-1. **Clone the Repository**
+## 🚀 Setup Instructions
 
-    ```bash
-    git clone https://github.com/weter123/bgg_scrapper.git
-    cd bgg_scrapper
-    ```
+1. **Clone the Repository**:
+   ```bash
+   git clone https://github.com/weter123/bgg_scrapper.git
+   cd bgg_scrapper
+2. **Install Required Packages**: Ensure you have `pip` installed. Then, run:
+   ```bash
+   pip install pandas requests openpyxl beautifulsoup4
 
-2. **Install Required Packages**
+## 🛠️ How to Use
 
-    Ensure you have `pip` installed. If not, install it first. Then, run:
+### Extract Collection Data via BGG XML API
 
-    ```bash
-    pip install pandas requests openpyxl
-    ```
+1. **Run the Main Script**:
+   Execute the following command in your terminal:
+   ```bash
+   python extract_from_api.py
 
-## How to Use
-
-1. **Run the Script**
-
-    Execute the script in your terminal or command prompt:
-
-    ```bash
-    python extract_from_api.py
-    ```
-
-2. **Enter Username**
+2. **Enter Your BGG Username**: When prompted, provide your BoardGameGeek username.
 
     When prompted, enter your BGG username.
 
 3. **View Results**
 
-    The script will extract your game collection data, store it in a SQLite database and Excel file, both named after your username.
+   - The script will extract your game collection data.
+   - It will store the data in:
+      - A SQLite database: {username}.db
+      - An Excel file: {username}.xlsx
+---
+
+### Scrape Advanced Search Results
+
+1. **Run the Web Scraper Script**:
+   Execute the following command in your terminal:
+   ```bash
+   python extract_from_bgg_table.py
+2. **Input a Valid BGG Advanced Search URL**: Provide a valid URL from the advanced search page of the BoardGameGeek website.
+
+3. View Results:
+   - The script will extract and process the search results.
+   - It will save the data to a timestamped Excel file, e.g., search_result_YYYY-MM-DD-HHMMSS.xlsx.
+---
 
 ## Project Structure
 
@@ -68,6 +83,5 @@ This Python script extracts collection data from the BoardGameGeek (BGG) XML API
 
 Contributions are welcome! Please open an issue or submit a pull request for any improvements or bug fixes.
 
-## Contact
 
 
