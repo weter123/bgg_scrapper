@@ -156,11 +156,20 @@ try:
     designer_df.to_sql("DESIGNERS", conn, if_exists='append',index=False)
     collection_df.to_sql("BOARDGAMES",conn,if_exists='append',index=False)
 
+    query_statment = ("SELECT * FROM BOARDGAMES")
+    sql_boardgame_df = pd.read_sql(query_statment,conn)
+
+    query_statment = ("SELECT * FROM MECHANICS")
+    sql_mechanics_df = pd.read_sql(query_statment,conn)
+
+    query_statment = ("SELECT * FROM DESIGNERS")
+    sql_designer_df = pd.read_sql(query_statment,conn)
+
     """ create and populate excel file with game data """
     with pd.ExcelWriter(f'{username}.xlsx') as writer:
-        collection_df.to_excel(writer,sheet_name='Collection')
-        mechanics_df.to_excel(writer, sheet_name='Game_Mechanics')
-        designer_df.to_excel(writer, sheet_name='Game_Designers')
+        sql_boardgame_df.to_excel(writer,sheet_name='Collection')
+        sql_mechanics_df.to_excel(writer, sheet_name='Game_Mechanics')
+        sql_designer_df.to_excel(writer, sheet_name='Game_Designers')
         
     log_progress('Load Data to Database complete')
 
